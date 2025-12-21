@@ -1,0 +1,114 @@
+datasource db {
+  provider = "postgresql" //add here your database provider
+  url      = env("DATABASE_URL")
+}
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enter your schema design here and run 'npx prisma db push' after every update to the schema
+// Also see the docs here: https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch
+
+
+enum RoleName {
+    ADMIN
+    MANAGER
+    MEMBER
+}
+
+
+enum OrderStatus {
+  PENDING
+  PLACED
+  CANCELLED
+}
+
+enum RegionName {
+  INDIA
+  AMERICA
+}
+
+
+model User {
+     id        Int    @id @default(autoincrement())
+     email     String    @unique
+     password  String
+     firstName String
+     lastName  String
+
+     role     Role        @relation(fields: [roleId], references: [id])
+     roleId   Int
+
+     region   Region      @relation(fields: [regionId], references: [id])
+     regionId Int
+
+     orders   Order[]
+}
+
+
+model Role {
+     id       Int         @id @default(autoincrement())
+     name     RoleName    @unique
+     users    User[]
+}
+
+model Region {
+     id          Int         @id @default(autoincrement())
+     name        RegionName  @unique
+     users       User[]
+     restaurants Restaurant[]
+     orders      Order[] 
+}
+
+model Restaurant {
+     id       Int         @id @default(autoincrement())
+     name     String      @unique
+     region   Region      @relation(fields: [regionId], references: [id])
+     regionId Int
+     menuItems MenuItem[]
+}
+
+
+model MenuItem {
+     id          Int         @id @default(autoincrement())
+     name        String      @unique
+     description String?
+     price       Float
+
+
+     restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+     restaurantId Int
+     orderItems   OrderItem[]  
+}
+
+
+model Order {
+     id            Int         @id @default(autoincrement())
+     createdAt     DateTime    @default(now())
+     updatedAt     DateTime    @updatedAt
+     status        OrderStatus @default(PENDING)
+     paymentMethod String
+     total         Float
+
+
+     user          User       @relation(fields: [userId], references: [id])
+     userId        Int
+     orderItems    OrderItem[]
+
+     region        Region     @relation(fields: [regionId], references: [id])
+     regionId      Int
+}
+
+
+model OrderItem {
+     id          Int         @id @default(autoincrement())
+     quantity    Int 
+     subtotal    Float
+
+     order         Order       @relation(fields: [orderId], references: [id])
+     orderId       Int
+     menuItem      MenuItem    @relation(fields: [menuItemId], references: [id])
+     menuItemId    Int
+
+}
+
