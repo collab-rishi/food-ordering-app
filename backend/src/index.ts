@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { configDotenv } from 'dotenv';
+import authRoutes from './routes/auth.routes';
 configDotenv();
 
 const port = process.env.PORT || 8080;
@@ -11,6 +12,8 @@ app.use(
     extended: true,
   })
 );
+
+app.use('/api/auth', authRoutes);
 
 
 app.get('/', (req: Request, res: Response) => {
