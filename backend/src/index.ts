@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { configDotenv } from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import { authenticate, authorize } from './middleware/auth.middleware';
 configDotenv();
 
 const port = process.env.PORT || 8080;
@@ -12,6 +13,18 @@ app.use(
     extended: true,
   })
 );
+
+// Any logged-in user can see this
+app.get('/api/test/member', authenticate, (req, res) => {
+  res.json({ message: "Member access granted", user: (req as any).user });
+});
+
+app.use((err: any, req: any, res: any, next: any) => {
+  if (err.name === 'ZodError') {
+    return res.status(400).json({ success: false, errors: err.errors });
+  }
+  res.status(500).json({ success: false, message: err.message });
+});
 
 app.use('/api/auth', authRoutes);
 
@@ -32,6 +45,13 @@ app.get('/health', (req: Request, res: Response) => {
     uptime: process.uptime(),
   });
 });
+
+// Only ADMINS can see this
+app.get('/api/test/admin', authenticate, authorize(['ADMIN']), (req, res) => {
+  res.json({ message: "Admin access granted", user: (req as any).user });
+});
+
+
 
 
 app.listen(port, () => {
