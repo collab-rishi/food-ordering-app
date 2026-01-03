@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { configDotenv } from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import restaurantRoutes from './routes/restaurant.routes';
+import menuRoutes from './routes/menu.routes';
 import { authenticate, authorize } from './middleware/auth.middleware';
 configDotenv();
 
@@ -27,6 +29,8 @@ app.use((err: any, req: any, res: any, next: any) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/menu-items', menuRoutes);
 
 
 app.get('/', (req: Request, res: Response) => {
